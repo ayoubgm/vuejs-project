@@ -2,7 +2,7 @@
 import type { TaskType } from '@/types';
 import axios from 'axios';
 import type { ActionTree, MutationTree } from 'vuex';
-const API_ENDPOINT = 'http://localhost:3000';
+const API_ENDPOINT = import.meta.env.VUE_APP_API_URL;
 
 const state = {
   tasks: []

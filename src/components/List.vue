@@ -9,7 +9,7 @@ import type { TaskType } from '../types';
     <h1 class="mt-3 text-xl md:text-3xl font-extrabold tracking-tight pt-5 pb-10">Tasks</h1>
     <button
       class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-xs md:text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-      @click="openSlide">
+      @click="openSlide('create')">
       Add new task
     </button>
   </div>
@@ -30,6 +30,7 @@ import type { TaskType } from '../types';
               </span>
             </div>
             <Toggle
+              @click="changeToggle(task)"
               v-model="task.isdone"
               :classes="{
                 container: 'inline-block rounded-full outline-none focus:ring focus:ring-green-500 focus:ring-opacity-30',
@@ -57,7 +58,9 @@ import type { TaskType } from '../types';
       <div>
         <div class="-mt-px flex divide-x divide-gray-200">
           <div class="flex w-0 flex-1">
-            <button class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold hover:bg-gray-100">
+            <button
+              @click="handleUpdate(task)"
+              class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold hover:bg-gray-100">
               <PencilIcon class="h-4 w-4 text-blue-500" />
             </button>
           </div>
@@ -91,11 +94,17 @@ export default {
     }
   },
   methods: {
-    openSlide() {
-      this.$emit('openSlide');
+    openSlide(operation: string) {
+      this.$emit('openSlide', operation);
     },
     openModal(id: number) {
       this.$emit('openModal', id);
+    },
+    changeToggle(task: TaskType) {
+      this.$emit('handleDone', task);
+    },
+    handleUpdate(task: TaskType) {
+      this.$emit('setTaskToUpdate', task);
     }
   },
   computed: {

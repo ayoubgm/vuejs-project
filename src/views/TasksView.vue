@@ -11,10 +11,13 @@ import SlideOver from '../components/SlideOver.vue';
       :tasks="$store.state.tasks.tasks"
       @openSlide="handleSlideOver"
       @openModal="handleConfirmModal"
-      />
+      @handleDone="handleTaskDone"
+      @setTaskToUpdate="setTaskToUpdate"/>
     <SlideOver
+      :operation="operation"
       :isSlideOpen="isUpsertSlideOpen"
-      @close="handleSlideOver" />
+      :data="taskToUpdate"
+      @close="handleSlideOver"/>
     <ConfirmationModal
       :isModalOpen="isModalConfirmOpen"
       @close="handleConfirmModal"
@@ -31,67 +34,34 @@ const toastConfig = {
   position: "top"
 }
 
-// [
-//     {
-//       "id": 1,
-//       "categories": ["Backend", "Frontend"],
-//       "title": "Regional Paradigm Technician",
-//       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-//       "createdAt": "2023-08-01T00:00:00.000Z"
-//     },
-//     {
-//       "id": 2,
-//       "categories": ["Frontend"],
-//       "title": "Regional Paradigm Technician",
-//       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-//       "createdAt": "2023-07-10T00:00:00.000Z"
-//     },
-//     {
-//       "id": 3,
-//       "categories": ["UI/UX"],
-//       "title": "Regional Paradigm Technician",
-//       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-//       "createdAt": "2023-06-01T00:00:00.000Z"
-//     },
-//     {
-//       "id": 4,
-//       "categories": ["Deployement"],
-//       "title": "Regional Paradigm Technician",
-//       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-//       "createdAt": "2023-05-01T00:00:00.000Z"
-//     },
-//     {
-//       "id": 5,
-//       "categories": ["DB"],
-//       "title": "Regional Paradigm Technician",
-//       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-//       "createdAt": "2023-04-01T00:00:00.000Z"
-//     },
-//     {
-//       "id": 6,
-//       "categories": ["Frontend"],
-//       "title": "Regional Paradigm Technician",
-//       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-//       "createdAt": "2023-03-01T00:00:00.000Z"
-//     }
-//   ]
-
 export default {
   data() {
     return {
+      operation: "create",
       isUpsertSlideOpen: ref(false),
       isModalConfirmOpen: ref(false),
+      taskToUpdate: null,
       taskToDelete: ref(null),
     }
   },
   methods: {
-    ...mapActions('tasks', ['fetchTasks', 'addTask', 'updateTask', 'deleteTask']),
-    handleSlideOver() {
+    ...mapActions('tasks', ['fetchTasks', 'deleteTask', 'updateTask']),
+    handleSlideOver(operation: string) {
+      this.operation = operation;
+      if (this.isUpsertSlideOpen)
+        this.taskToUpdate = null;
       this.isUpsertSlideOpen = !this.isUpsertSlideOpen;
     },
     handleConfirmModal(id: number) {
       this.taskToDelete = id;
+      if (this.isModalConfirmOpen)
+        this.taskToDelete = null;
       this.isModalConfirmOpen = !this.isModalConfirmOpen;
+    },
+    setTaskToUpdate(task: TaskType) {
+      this.operation = "update"
+      this.taskToUpdate = task;
+      this.isUpsertSlideOpen = !this.isUpsertSlideOpen;
     },
     handleDeleteTask () {
       try {
@@ -103,11 +73,17 @@ export default {
             type: 'success',
           })
         } else {
-          this.$toast.open({
-            ...toastConfig,
-            message: 'No task has been provided !',
-            type: 'warning',
-          })
+          this.$toast.open({ ...toastConfig, message: 'No task has been provided !', type: 'warning' })
+        }
+      } catch (e) {
+        this.$toast.open({ ...toastConfig, message: 'Something went wrong!', type: 'error' })
+      }
+    },
+    handleTaskDone (task: TaskType) {
+      try {
+        if (task) {
+          // * in this case the createdAt used at updatedAt
+          this.updateTask({ ...task, isdone: task.isdone, createdAt: new Date() });
         }
       } catch (e) {
         this.$toast.open({

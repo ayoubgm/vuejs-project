@@ -31,43 +31,62 @@ import { XMarkIcon } from '@heroicons/vue/24/outline';
                   </div>
                 </div>
               </div>
-              <div class="relative mt-6 flex-1 px-4 sm:px-6">
-                <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                  <div class="sm:col-span-full">
-                    <label for="title" class="block text-sm font-medium leading-6 text-gray-900">Title</label>
-                    <div class="mt-2">
-                      <input
-                        id="title"
-                        type="text"
-                        name="title"
-                        autocomplete="title"
-                        class="block w-full rounded-md py-1.5 px-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 ring-1 ring-inset ring-gray-300"
-                        placeholder="janesmith" />
+              <form
+                class="relative h-full"
+                @submit.prevent="submit">
+                <div class="relative mt-6 flex-1 px-4 sm:px-6">
+                  <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                    <div class="sm:col-span-full">
+                      <label for="title" class="block text-sm font-medium leading-6 text-gray-900">Title</label>
+                      <div class="mt-2">
+                        <input
+                          v-model="form.title"
+                          id="title"
+                          type="text"
+                          name="title"
+                          autocomplete="title"
+                          class="block w-full rounded-md py-1.5 px-2 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 ring-1 ring-inset ring-gray-300"
+                          placeholder="Enter a title for your task" />
+                      </div>
+                      <div v-if="errors.title" class="text-red-500 text-xs mt-2">{{ errors.title[0] }}</div>
                     </div>
-                  </div>
-                  <div class="col-span-full">
-                    <label for="descr" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
-                    <div class="mt-2">
-                      <textarea
-                        id="descr"
-                        name="descr"
-                        rows="3"
-                        class="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+                    <div class="col-span-full">
+                      <label for="descr" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
+                      <div class="mt-2">
+                        <textarea
+                          v-model="form.descr"
+                          id="descr"
+                          name="descr"
+                          rows="3"
+                          class="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          placeholder="Describe your task" />
+                      </div>
+                      <div v-if="errors.descr" class="text-red-500 text-xs mt-2">{{ errors.descr[0] }}</div>
                     </div>
-                  </div>
-                  <div class="col-span-full">
-                    <label for="descr" class="block text-sm font-medium leading-6 text-gray-900">Categories</label>
-                    <Multiselect
-                      class="text-sm"
-                      v-model="values"
-                    ></Multiselect>
+                    <div class="col-span-full">
+                      <label for="descr" class="block text-sm font-medium leading-6 text-gray-900">Categories</label>
+                      <Multiselect
+                        v-model="form.categories"
+                        :options="options"
+                        :classes="{
+                          container: 'relative mx-auto w-full flex items-center justify-end box-border cursor-pointer border border-gray-300 rounded bg-white text-base leading-snug outline-none mt-2',
+                          placeholder: 'flex items-center h-full absolute left-0 top-0 text-sm pointer-events-none bg-transparent leading-snug pl-3.5 text-gray-400 rtl:left-auto rtl:right-0 rtl:pl-0 rtl:pr-3.5'
+                        }"
+                        mode="tags"
+                        searchable="true"
+                        placeholder="Choose some categories for your task"
+                      ></Multiselect>
+                      <div v-if="errors.categories" class="text-red-500 text-xs mt-2">{{ errors.categories[0] }}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <button
-                class="rounded-md bg-indigo-600 px-3.5 py-2.5 m-3 text-xs md:text-sm font-semibold text-white shadow-sm mb-auto hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                Create
-              </button>
+                <div class="absolute bottom-0 flex w-full justify-center">
+                  <button
+                    class="w-64 items-center rounded-md bg-indigo-600 px-3.5 py-2.5 text-xs md:text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                    {{ submitBtnText }}
+                  </button>
+                </div>
+              </form>
             </div>
           </DialogPanel>
         </TransitionChild>
@@ -78,6 +97,15 @@ import { XMarkIcon } from '@heroicons/vue/24/outline';
 
 <script lang="ts">
 import Multiselect from '@vueform/multiselect';
+import { mapActions } from 'vuex';
+import { z } from 'zod';
+import type { TaskErrors, TaskForm } from '../types';
+
+const taskSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  descr: z.string().min(1, 'Description is required'),
+  categories: z.array(z.string()).min(1, 'At least one category is required'),
+});
 
 export default {
   components: {
@@ -86,31 +114,76 @@ export default {
   props: {
     isSlideOpen: {
       type: Boolean,
-      default: false
+      default: true
+    },
+    operation: {
+      type: String,
+      default: true
+    },
+    data: {
+      default: null
+    }
+  },
+  data (): { submitBtnText: string, form: TaskForm; errors: TaskErrors; options: any[] } {
+    return {
+      submitBtnText: "Create",
+      options: [
+        { value: 'Front-end', label: 'Front-end' },
+        { value: 'Back-end', label: 'Back-end' },
+        { value: 'UI/UX', label: 'UI/UX' },
+        { value: 'Deployement', label: 'Deployement' },
+        { value: 'Unit testing', label: 'Unit testing' },
+        { value: 'E2E Testing', label: 'E2E Testing' },
+      ],
+      form: {
+        title: '',
+        descr: '',
+        categories: [],
+      },
+      errors: {}
+    }
+  },
+  watch: {
+    operation(newVal) {
+      this.submitBtnText = newVal == "create" ? "Create" : "Update";
+      if (newVal == "update") {
+        this.form.title = this.data.title
+        this.form.descr = this.data.descr
+        this.form.categories = this.data.categories
+      }
     }
   },
   methods: {
+    ...mapActions('tasks', ['addTask', 'updateTask']),
     close() {
-      this.$emit('close');
-    }
-  },
-  data () {
-    return {
-      mode: 'tags',
-      values: [],
-      options: [
-        { value: 'fontend', label: 'Front-end' },
-        { value: 'backend', label: 'Back-end' },
-        { value: 'ui-ux', label: 'UI/UX' },
-        { value: 'deploy', label: 'Deployement' },
-        { value: 'unit-testing', label: 'Unit testing' },
-        { value: 'e2e-testing', label: 'E2E Testing' },
-      ],
-      closeOnSelect: false,
-      searchable: true,
-      createOption: true
-    }
+      this.$emit('close', "create");
+    },
+    validate() {
+      const result = taskSchema.safeParse(this.form);
+
+      if (!result.success) {
+        this.errors = result.error.formErrors.fieldErrors;
+      } else {
+        this.errors = {};
+      }
+      return result.success;
+    },
+    submit() {
+      if (this.validate()) {
+        if (this.operation == "create") {
+          this.addTask({ ...this.form, isdone: false, createdAt: new Date()})
+        } else {
+          this.updateTask({
+            ...this.data,
+            title: this.form.title,
+            descr: this.form.descr,
+            categories: this.form.categories,
+            createdAt: new Date()
+          })
+        }
+        this.$emit('close');
+      }
+    },
   },
 }
-
 </script>

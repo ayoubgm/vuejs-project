@@ -3,22 +3,22 @@
     {
       "id": 1,
       "categories": [
-        "Backend",
-        "Frontend"
+        "Back-end",
+        "Front-end"
       ],
       "title": "Regional Paradigm Technician",
       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-      "createdAt": "2023-08-01T00:00:00.000Z",
+      "createdAt": "2023-08-02T13:41:35.403Z",
       "isdone": false
     },
     {
       "id": 2,
       "categories": [
-        "Frontend"
+        "Unit testing"
       ],
       "title": "Regional Paradigm Technician",
       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-      "createdAt": "2023-07-10T00:00:00.000Z",
+      "createdAt": "2023-08-02T14:39:45.087Z",
       "isdone": false
     },
     {
@@ -28,8 +28,8 @@
       ],
       "title": "Regional Paradigm Technician",
       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-      "createdAt": "2023-06-01T00:00:00.000Z",
-      "isdone": false
+      "createdAt": "2023-08-02T13:42:37.623Z",
+      "isdone": true
     },
     {
       "id": 4,
@@ -38,23 +38,24 @@
       ],
       "title": "Regional Paradigm Technician",
       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-      "createdAt": "2023-05-01T00:00:00.000Z",
-      "isdone": false
+      "createdAt": "2023-08-02T14:40:04.869Z",
+      "isdone": true
     },
     {
       "id": 5,
       "categories": [
-        "DB"
+        "Unit testing",
+        "E2E Testing"
       ],
-      "title": "Regional Paradigm Technician",
+      "title": "Regional Paradigm Technician Updates",
       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-      "createdAt": "2023-04-01T00:00:00.000Z",
+      "createdAt": "2023-08-02T14:42:50.123Z",
       "isdone": false
     },
     {
       "id": 6,
       "categories": [
-        "Frontend"
+        "Front-end"
       ],
       "title": "Regional Paradigm Technician",
       "descr": "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
@@ -67,9 +68,19 @@
       "categories": [
         "UI/UX"
       ],
-      "isdone": false,
-      "createdAt": "2023-08-02T13:23:51.841Z",
+      "isdone": true,
+      "createdAt": "2023-08-02T14:40:05.652Z",
       "id": 7
+    },
+    {
+      "title": "Ratione fuga Verita",
+      "descr": "Consectetur at id c",
+      "categories": [
+        "UI/UX"
+      ],
+      "isdone": false,
+      "createdAt": "2023-08-02T14:41:05.090Z",
+      "id": 8
     }
   ]
 }

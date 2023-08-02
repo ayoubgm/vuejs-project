@@ -1,4 +1,10 @@
 {
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true
+  },
   "files": [],
   "references": [
     {

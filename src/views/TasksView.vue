@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { mapActions, mapState } from 'vuex';
 import ConfirmationModal from '../components/ConfirmationModal.vue';
 import ListView from '../components/List.vue';
 import SlideOver from '../components/SlideOver.vue';
@@ -7,88 +8,103 @@ import SlideOver from '../components/SlideOver.vue';
 <template>
   <main>
     <ListView
-      :tasks="tasks"
+      :tasks="$store.state.tasks.tasks"
       @openSlide="handleSlideOver"
       @openModal="handleConfirmModal"
-      />
+      @handleDone="handleTaskDone"
+      @setTaskToUpdate="setTaskToUpdate"/>
     <SlideOver
+      :operation="operation"
       :isSlideOpen="isUpsertSlideOpen"
-      @close="handleSlideOver" />
+      :data="taskToUpdate"
+      @close="handleSlideOver"/>
     <ConfirmationModal
       :isModalOpen="isModalConfirmOpen"
-      @close="handleConfirmModal"/>
+      @close="handleConfirmModal"
+      @delete="handleDeleteTask"/>
   </main>
 </template>
 <script lang="ts">
 import { format, parseISO } from 'date-fns';
 import { ref } from 'vue';
+import type { TaskType } from '../types';
+
+const toastConfig = {
+  duration: 3000,
+  position: "top"
+}
 
 export default {
   data() {
     return {
+      operation: "create",
       isUpsertSlideOpen: ref(false),
       isModalConfirmOpen: ref(false),
-      tasks: [
-        {
-          id: 1,
-          categories: ["Backend", "Frontend"],
-          title: "Regional Paradigm Technician",
-          descr: "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-          createdAt: "2023-08-01T00:00:00.000Z",
-        },
-        {
-          id: 2,
-          categories: ["Frontend"],
-          title: "Regional Paradigm Technician",
-          descr: "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-          createdAt: "2023-07-10T00:00:00.000Z",
-        },
-        {
-          id: 3,
-          categories: ["UI/UX"],
-          title: "Regional Paradigm Technician",
-          descr: "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-          createdAt: "2023-06-01T00:00:00.000Z",
-        },
-        {
-          id: 4,
-          categories: ["Deployement"],
-          title: "Regional Paradigm Technician",
-          descr: "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-          createdAt: "2023-05-01T00:00:00.000Z",
-        },
-        {
-          id: 5,
-          categories: ["DB"],
-          title: "Regional Paradigm Technician",
-          descr: "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-          createdAt: "2023-04-01T00:00:00.000Z",
-        },
-        {
-          id: 6,
-          categories: ["Frontend"],
-          title: "Regional Paradigm Technician",
-          descr: "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur",
-          createdAt: "2023-03-01T00:00:00.000Z",
-        },
-      ],
+      taskToUpdate: null,
+      taskToDelete: ref(null),
     }
   },
   methods: {
-    handleSlideOver() {
+    ...mapActions('tasks', ['fetchTasks', 'deleteTask', 'updateTask']),
+    handleSlideOver(operation: string) {
+      this.operation = operation;
+      if (this.isUpsertSlideOpen)
+        this.taskToUpdate = null;
       this.isUpsertSlideOpen = !this.isUpsertSlideOpen;
     },
-    handleConfirmModal() {
+    handleConfirmModal(id: number) {
+      this.taskToDelete = id;
+      if (this.isModalConfirmOpen)
+        this.taskToDelete = null;
       this.isModalConfirmOpen = !this.isModalConfirmOpen;
+    },
+    setTaskToUpdate(task: TaskType) {
+      this.operation = "update"
+      this.taskToUpdate = task;
+      this.isUpsertSlideOpen = !this.isUpsertSlideOpen;
+    },
+    handleDeleteTask () {
+      try {
+        if (this.taskToDelete) {
+          this.deleteTask(this.taskToDelete)
+          this.$toast.open({
+            ...toastConfig,
+            message: 'The task has been deleted !',
+            type: 'success',
+          })
+        } else {
+          this.$toast.open({ ...toastConfig, message: 'No task has been provided !', type: 'warning' })
+        }
+      } catch (e) {
+        this.$toast.open({ ...toastConfig, message: 'Something went wrong!', type: 'error' })
+      }
+    },
+    handleTaskDone (task: TaskType) {
+      try {
+        if (task) {
+          // * in this case the createdAt used at updatedAt
+          this.updateTask({ ...task, isdone: task.isdone, createdAt: new Date() });
+        }
+      } catch (e) {
+        this.$toast.open({
+          ...toastConfig,
+          message: 'Something went wrong!',
+          type: 'error',
+        })
+      }
     }
   },
   computed: {
+    ...mapState(['tasks']),
     formattedDates() {
-      return this.tasks.map(task => ({
+      return this.tasks.map((task: TaskType) => ({
         ...task,
         createdAt: format(parseISO(task.createdAt), 'MMM dd, yyyy')
       }));
     }
-  }
+  },
+  mounted() {
+    this.fetchTasks();
+  },
 }
 </script>

@@ -1,14 +1,13 @@
 
 import type { TaskType } from '@/types';
 import axios from 'axios';
-import type { ActionTree, MutationTree } from 'vuex';
-const API_ENDPOINT = 'http://localhost:3000';
+const API_ENDPOINT = import.meta.env.VITE_API_URL;
 
 const state = {
   tasks: []
 }
 
-const actions: ActionTree<{ tasks: TaskType[] }, any> = {
+const actions = {
   async fetchTasks(
     { commit }: any
   ) {
@@ -42,7 +41,7 @@ const actions: ActionTree<{ tasks: TaskType[] }, any> = {
   },
 };
 
-const mutations: MutationTree<{ tasks: TaskType[] }>  = {
+const mutations = {
   setTasks(
     state: any,
     tasks: TaskType[]

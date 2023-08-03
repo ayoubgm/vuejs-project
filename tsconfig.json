@@ -3,7 +3,8 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "noImplicitAny": false
   },
   "files": [],
   "references": [
